@@ -35,6 +35,7 @@
 		{ key: 'emailPassword',       label: 'Email App Password',        group: 'Email',       placeholder: 'Enter new password…', secret: true },
 		{ key: 'youtubeApiKey',       label: 'YouTube Data API Key',      group: 'YouTube',     placeholder: 'Enter new key…',  secret: true  },
 		{ key: 'groqApiKey',          label: 'Groq API Key (AI Chatbot)', group: 'Groq AI',     placeholder: 'gsk_…',           secret: true  },
+		{ key: 'resendApiKey',        label: 'Resend API Key (Email)',     group: 'Resend',      placeholder: 're_…',            secret: true  },
 	];
 
 	let keyStatus   = $state<KeysMap>({});
@@ -226,7 +227,7 @@
 				<LoadingSpinner size="lg" class="py-20" />
 			{:else}
 				<form onsubmit={saveKeys} class="space-y-5">
-					{#each ['Cloudinary', 'Email', 'YouTube', 'Groq AI'] as group}
+					{#each ['Cloudinary', 'Email', 'YouTube', 'Groq AI', 'Resend'] as group}
 						{@const groupKeys = KEY_DEFS.filter(k => k.group === group)}
 						<div class="admin-card space-y-4">
 							<h3 class="text-white font-semibold flex items-center gap-2">

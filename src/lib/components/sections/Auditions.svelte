@@ -8,16 +8,37 @@
 
 	let auditions = $state<Audition[]>([]);
 	let loading = $state(true);
+	let now = $state(Date.now());
 
 	onMount(() => {
 		auditionsApi.getAll()
 			.then(res => { auditions = res.data.data.auditions || []; })
 			.catch(() => { auditions = []; })
 			.finally(() => { loading = false; });
+
+		const ticker = setInterval(() => { now = Date.now(); }, 1000);
+		return () => clearInterval(ticker);
 	});
 
 	function formatDate(d: string) {
 		return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+	}
+
+	function formatDeadline(d: string) {
+		return new Date(d).toLocaleString('en-IN', {
+			day: '2-digit', month: 'short', year: 'numeric',
+			hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata'
+		}) + ' IST';
+	}
+
+	function getCountdown(applicationEnd: string, currentNow: number) {
+		const diff = new Date(applicationEnd).getTime() - currentNow;
+		if (diff <= 0) return null;
+		const days  = Math.floor(diff / 86400000);
+		const hours = Math.floor((diff % 86400000) / 3600000);
+		const mins  = Math.floor((diff % 3600000) / 60000);
+		const secs  = Math.floor((diff % 60000) / 1000);
+		return { days, hours, mins, secs };
 	}
 </script>
 
@@ -47,6 +68,7 @@
 		{:else}
 			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 				{#each auditions as a}
+					{@const cd = a.isOpen ? getCountdown(a.applicationEnd, now) : null}
 					<div class="group card-ripple card-ring-hover relative rounded-2xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-2 audition-card">
 						<div class="relative h-48 overflow-hidden">
 							{#if a.featureImage}
@@ -66,12 +88,57 @@
 						<div class="p-6 flex flex-col flex-1">
 							<h3 class="font-display text-xl font-bold text-sjcu-text-primary mb-3">{a.title}</h3>
 
-							<div class="space-y-2 text-sm text-sjcu-text-secondary mb-5">
+							<div class="space-y-2 text-sm text-sjcu-text-secondary mb-4">
 								<div class="flex items-center gap-2"><CalendarDays class="w-4 h-4 text-sjcu-accent flex-shrink-0" /> {formatDate(a.date)}</div>
 								<div class="flex items-center gap-2"><MapPin class="w-4 h-4 text-sjcu-accent flex-shrink-0" /> {a.venue}</div>
 								<div class="flex items-center gap-2"><Users2 class="w-4 h-4 text-sjcu-accent flex-shrink-0" /> Age {a.minAge}–{a.maxAge}</div>
-								<div class="flex items-center gap-2"><Clock class="w-4 h-4 text-sjcu-accent flex-shrink-0" /> Apply by {formatDate(a.applicationEnd)}</div>
+								<div class="flex items-center gap-2">
+									<Clock class="w-4 h-4 text-sjcu-accent flex-shrink-0" />
+									<span>{a.isOpen ? 'Closes' : 'Closed'}: {formatDeadline(a.applicationEnd)}</span>
+								</div>
 							</div>
+
+							<!-- Live countdown timer (only when open) -->
+							{#if a.isOpen && cd}
+								<div class="mb-4 rounded-xl p-3 countdown-box">
+									<p class="text-[10px] font-semibold uppercase tracking-widest text-sjcu-accent mb-2 text-center">Application closes in</p>
+									<div class="flex items-center justify-center gap-1.5">
+										{#if cd.days > 0}
+											<div class="countdown-block">
+												{#key cd.days}
+													<span class="countdown-num">{String(cd.days).padStart(2,'0')}</span>
+												{/key}
+												<span class="countdown-unit">d</span>
+											</div>
+											<span class="countdown-colon">:</span>
+										{/if}
+										<div class="countdown-block">
+											{#key cd.hours}
+												<span class="countdown-num">{String(cd.hours).padStart(2,'0')}</span>
+											{/key}
+											<span class="countdown-unit">h</span>
+										</div>
+										<span class="countdown-colon">:</span>
+										<div class="countdown-block">
+											{#key cd.mins}
+												<span class="countdown-num">{String(cd.mins).padStart(2,'0')}</span>
+											{/key}
+											<span class="countdown-unit">m</span>
+										</div>
+										<span class="countdown-colon">:</span>
+										<div class="countdown-block">
+											{#key cd.secs}
+												<span class="countdown-num tabular-nums">{String(cd.secs).padStart(2,'0')}</span>
+											{/key}
+											<span class="countdown-unit">s</span>
+										</div>
+									</div>
+								</div>
+							{:else if a.isOpen && !cd}
+								<div class="mb-4 rounded-xl p-3 countdown-box">
+									<p class="text-[11px] text-red-400 text-center font-semibold">Applications closing now!</p>
+								</div>
+							{/if}
 
 							<a
 								href={a.isOpen ? `/auditions/${a._id}` : undefined}
@@ -92,5 +159,41 @@
 	.audition-card {
 		background: rgba(255, 255, 255, 0.03);
 		border: 1px solid var(--mt-card-border, rgba(255, 255, 255, 0.08));
+	}
+
+	.countdown-box {
+		background: rgba(124, 58, 237, 0.08);
+		border: 1px solid rgba(124, 58, 237, 0.25);
+	}
+
+	.countdown-block {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 2px;
+	}
+
+	.countdown-num {
+		font-size: 1.25rem;
+		font-weight: 700;
+		color: #fff;
+		line-height: 1;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.countdown-unit {
+		font-size: 0.6rem;
+		color: #a78bfa;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.countdown-colon {
+		font-size: 1.1rem;
+		font-weight: 700;
+		color: #7c3aed;
+		align-self: flex-start;
+		margin-top: 2px;
 	}
 </style>

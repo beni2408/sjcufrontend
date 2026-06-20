@@ -16,10 +16,39 @@
 	let imagePreview = $state('');
 
 	let extendId = $state<string | null>(null);
-	let extendDate = $state('');
+	let extendDateTime = $state('');
 	let extending = $state(false);
 
-	function toDateInput(d: string) { return d ? new Date(d).toISOString().slice(0, 10) : ''; }
+	/**
+	 * UTC ISO string → "YYYY-MM-DDTHH:mm" in browser local time (IST for Indian users).
+	 * datetime-local inputs are always local time — no manual offset needed.
+	 */
+	function toISTInput(d: string): string {
+		if (!d) return '';
+		const dt = new Date(d);
+		const pad = (n: number) => String(n).padStart(2, '0');
+		return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+	}
+
+	/** datetime-local value → UTC ISO string. Browser treats it as local time automatically. */
+	function fromISTInput(s: string): string {
+		if (!s) return '';
+		return new Date(s).toISOString();
+	}
+
+	/** Date-only (no time needed) */
+	function toDateInput(d: string): string { return d ? new Date(d).toISOString().slice(0, 10) : ''; }
+
+	/** Format for card display — date + time in IST */
+	function formatDeadline(d: string): string {
+		if (!d) return '—';
+		return new Date(d).toLocaleString('en-IN', {
+			day: '2-digit', month: 'short', year: 'numeric',
+			hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata'
+		}) + ' IST';
+	}
+
+	function formatDate(d: string) { return d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'; }
 
 	let form = $state({ title: '', description: '', date: '', venue: '', applicationStart: '', applicationEnd: '', minAge: 5, maxAge: 60 });
 
@@ -39,7 +68,7 @@
 		editingId = a._id;
 		form = {
 			title: a.title, description: a.description, date: toDateInput(a.date), venue: a.venue,
-			applicationStart: toDateInput(a.applicationStart), applicationEnd: toDateInput(a.applicationEnd),
+			applicationStart: toDateInput(a.applicationStart), applicationEnd: toISTInput(a.applicationEnd),
 			minAge: a.minAge, maxAge: a.maxAge,
 		};
 		imageFile = null; imagePreview = a.featureImage; modalOpen = true;
@@ -54,7 +83,11 @@
 		saving = true;
 		try {
 			const fd = new FormData();
-			Object.entries(form).forEach(([k, v]) => fd.append(k, String(v)));
+			// Convert applicationEnd from IST input to UTC ISO before sending
+			Object.entries(form).forEach(([k, v]) => {
+				if (k === 'applicationEnd') fd.append(k, fromISTInput(String(v)));
+				else fd.append(k, String(v));
+			});
 			if (imageFile) fd.append('featureImage', imageFile);
 			if (editingId) { await auditionsApi.update(editingId, fd); showToast('Audition updated!', 'success'); }
 			else { await auditionsApi.create(fd); showToast('Audition created!', 'success'); }
@@ -67,19 +100,17 @@
 		catch { showToast('Failed to delete', 'error'); }
 	}
 
-	function openExtend(a: Audition) { extendId = a._id; extendDate = toDateInput(a.applicationEnd); }
+	function openExtend(a: Audition) { extendId = a._id; extendDateTime = toISTInput(a.applicationEnd); }
 	async function handleExtend(e: SubmitEvent) {
 		e.preventDefault();
 		if (!extendId) return;
 		extending = true;
 		try {
-			await auditionsApi.extendDeadline(extendId, extendDate);
+			await auditionsApi.extendDeadline(extendId, fromISTInput(extendDateTime));
 			showToast('Deadline extended!', 'success');
 			extendId = null; await load();
 		} catch (err: any) { showToast(err.response?.data?.message || 'Failed to extend deadline', 'error'); } finally { extending = false; }
 	}
-
-	function formatDate(d: string) { return d ? new Date(d).toLocaleDateString() : '—'; }
 </script>
 
 <svelte:head><title>Auditions — SJCU Admin</title></svelte:head>
@@ -114,7 +145,7 @@
 							<div class="flex items-center gap-1.5"><CalendarDays class="w-3 h-3" /> {formatDate(a.date)}</div>
 							<div class="flex items-center gap-1.5"><MapPin class="w-3 h-3" /> {a.venue}</div>
 							<div class="flex items-center gap-1.5"><Users2 class="w-3 h-3" /> Age {a.minAge}–{a.maxAge}</div>
-							<div class="flex items-center gap-1.5"><Clock class="w-3 h-3" /> Apply by {formatDate(a.applicationEnd)}</div>
+							<div class="flex items-center gap-1.5"><Clock class="w-3 h-3" /> Closes: {formatDeadline(a.applicationEnd)}</div>
 						</div>
 
 						<div class="flex items-center gap-1.5 pt-2 flex-wrap">
@@ -148,7 +179,13 @@
 		</div>
 		<div class="grid grid-cols-2 gap-4">
 			<div><label class="block text-sjcu-text-secondary text-sm mb-1.5">Applications Open *</label><input type="date" bind:value={form.applicationStart} class="admin-input" required /></div>
-			<div><label class="block text-sjcu-text-secondary text-sm mb-1.5">Applications Close *</label><input type="date" bind:value={form.applicationEnd} class="admin-input" required /></div>
+			<div>
+				<label class="block text-sjcu-text-secondary text-sm mb-1.5">
+					Applications Close (IST) *
+					<span class="ml-1 text-sjcu-text-muted text-[10px]">Date &amp; time</span>
+				</label>
+				<input type="datetime-local" bind:value={form.applicationEnd} class="admin-input" required />
+			</div>
 		</div>
 		<div class="grid grid-cols-2 gap-4">
 			<div><label class="block text-sjcu-text-secondary text-sm mb-1.5">Minimum Age</label><input type="number" min="0" bind:value={form.minAge} class="admin-input" /></div>
@@ -163,7 +200,13 @@
 
 <Modal open={!!extendId} title="Extend Application Deadline" onClose={() => (extendId = null)}>
 	<form onsubmit={handleExtend} class="space-y-4">
-		<div><label class="block text-sjcu-text-secondary text-sm mb-1.5">New Closing Date *</label><input type="date" bind:value={extendDate} class="admin-input" required /></div>
+		<div>
+			<label class="block text-sjcu-text-secondary text-sm mb-1.5">
+				New Closing Date &amp; Time (IST) *
+			</label>
+			<input type="datetime-local" bind:value={extendDateTime} class="admin-input" required />
+			<p class="text-sjcu-text-muted text-xs mt-1.5">Enter the exact date and time in Indian Standard Time (IST)</p>
+		</div>
 		<div class="flex justify-end gap-3 pt-2">
 			<button type="button" onclick={() => (extendId = null)} class="btn-outline text-sm px-5 py-2.5">Cancel</button>
 			<button type="submit" class="btn-primary text-sm px-5 py-2.5" disabled={extending}>{extending ? 'Saving...' : 'Extend'}</button>

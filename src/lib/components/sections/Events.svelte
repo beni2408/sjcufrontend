@@ -270,7 +270,7 @@
 		class="fixed inset-0 z-50 flex items-center justify-center p-4"
 		style="background: rgba(0,0,0,0.75); backdrop-filter: blur(16px);"
 	>
-		<div class="ev-modal-card relative w-full max-w-4xl rounded-[2rem] overflow-hidden shadow-2xl animate-modal-spring flex flex-col md:flex-row" style="min-height: 480px;">
+		<div class="ev-modal-card relative w-full max-w-4xl rounded-[2rem] overflow-hidden shadow-2xl animate-modal-spring flex flex-col md:flex-row max-h-[90vh]">
 
 			<!-- Left — banner image -->
 			<div class="relative md:w-80 flex-shrink-0 h-56 md:h-auto overflow-hidden">
@@ -287,7 +287,7 @@
 			</div>
 
 			<!-- Right — details -->
-			<div class="flex-1 flex flex-col justify-center px-10 py-12">
+			<div class="flex-1 flex flex-col justify-center px-10 py-12 overflow-y-auto min-h-0">
 				<!-- Date + time row -->
 				<div class="flex items-center gap-4 mb-6">
 					<div class="flex flex-col items-center justify-center w-16 h-16 rounded-2xl text-center flex-shrink-0" style="background: rgba(124,58,237,0.2); border: 1px solid rgba(124,58,237,0.35);">

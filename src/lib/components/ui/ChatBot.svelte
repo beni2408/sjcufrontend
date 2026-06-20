@@ -46,7 +46,7 @@
 			const history = messages.map(m => ({ role: m.role, content: m.content }));
 
 			const res = await chatApi.send(history);
-			const reply = res.data.reply;
+			const reply = res.data.data?.reply ?? res.data.reply;
 
 			messages = [...messages, { role: 'assistant', content: reply, time: new Date() }];
 			if (!open) unread++;
@@ -143,7 +143,7 @@
 						<Sparkles class="w-2.5 h-2.5" /> AI
 					</span>
 				</div>
-				<p class="text-green-500 text-xs">Powered by Claude AI · Live data</p>
+				<p class="text-green-500 text-xs">Powered by Groq AI · Live data</p>
 			</div>
 			<button onclick={toggleOpen} class="w-8 h-8 rounded-full hover:bg-sjcu-purple/10 flex items-center justify-center text-sjcu-text-muted hover:text-sjcu-text-primary transition-colors">
 				<X class="w-4 h-4" />

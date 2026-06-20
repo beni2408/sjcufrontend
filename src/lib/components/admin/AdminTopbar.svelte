@@ -53,16 +53,13 @@
 
 	async function fetchNotifications() {
 		if (!$authStore.token) return;
-		try {
-			const [appsRes, reviewsRes] = await Promise.all([
-				auditionApplicationsApi.getRecent(),
-				testimonialsApi.getPendingCount(),
-			]);
-			notifications = appsRes.data.data.applications ?? [];
-			pendingReviews = reviewsRes.data.data.count ?? 0;
-		} catch {
-			// silently fail — don't disrupt the admin layout on polling errors
-		}
+		// Fetch independently so one failure doesn't block the other
+		auditionApplicationsApi.getRecent()
+			.then(res => { notifications = res.data.data.applications ?? []; })
+			.catch(() => {});
+		testimonialsApi.getPendingCount()
+			.then(res => { pendingReviews = res.data.data.count ?? 0; })
+			.catch(() => {});
 	}
 
 	function markSeen() {

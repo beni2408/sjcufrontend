@@ -62,7 +62,7 @@
 			</div>
 		</a>
 
-		<div class="hidden md:flex items-center gap-1">
+		<div class="hidden lg:flex items-center gap-1">
 			{#each navLinks as link}
 				<a
 					href={link.href}
@@ -74,7 +74,7 @@
 			{/each}
 		</div>
 
-		<div class="hidden md:flex items-center gap-3">
+		<div class="hidden lg:flex items-center gap-3">
 			<!-- Theme toggle switch -->
 			<button
 				onclick={() => themeStore.toggle()}
@@ -97,7 +97,7 @@
 			</a>
 		</div>
 
-		<div class="md:hidden flex items-center gap-2">
+		<div class="lg:hidden flex items-center gap-2">
 			<!-- Theme toggle switch (mobile) -->
 			<button
 				onclick={() => themeStore.toggle()}
@@ -130,7 +130,7 @@
 	</div>
 
 	{#if menuOpen}
-		<div class="md:hidden absolute top-full left-0 right-0 bg-sjcu-navy/95 backdrop-blur-xl border-b border-sjcu-border/30 px-6 py-4 flex flex-col gap-1">
+		<div class="lg:hidden absolute top-full left-0 right-0 bg-sjcu-navy/95 backdrop-blur-xl border-b border-sjcu-border/30 px-6 py-4 flex flex-col gap-1">
 			{#each navLinks as link}
 				<a
 					href={link.href}

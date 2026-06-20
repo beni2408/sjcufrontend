@@ -241,7 +241,7 @@
 {#if activeTestimonial}
 	{@const t = activeTestimonial}
 	<div
-		class="fixed inset-0 z-50 flex items-center justify-center p-4"
+		class="fixed inset-0 z-50 flex items-start justify-center p-3 pt-4 lg:items-center lg:p-4"
 		style="background: rgba(0,0,0,0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);"
 		onclick={e => { if ((e.target as HTMLElement).id === 'tm-backdrop') closeModal(); }}
 		onkeydown={() => {}}
@@ -251,21 +251,23 @@
 		aria-label="Full testimonial from {t.name}"
 	>
 		<div
-			class="tm-card relative w-full max-w-2xl max-h-[92vh] rounded-3xl overflow-hidden flex flex-row animate-tm-spring"
+			class="tm-card relative w-full max-w-2xl max-h-[94vh] rounded-3xl overflow-hidden flex flex-col lg:flex-row animate-tm-spring"
 			onclick={e => e.stopPropagation()}
 			onkeydown={() => {}}
 			role="presentation"
 		>
-			<!-- Left — photo panel, fixed width, does NOT stretch to card bottom -->
+			<!-- Top (mobile/tablet) / Left (desktop) — photo panel -->
 			<div class="tm-photo-col flex-shrink-0 relative">
 				{#if t.photo}
-					<img src={t.photo} alt={t.name} class="w-full h-full object-cover object-top" />
-					<!-- Right-edge fade blending into card dark bg -->
-					<div class="absolute inset-0" style="background: linear-gradient(to right, transparent 55%, #0d0d23 100%);"></div>
-					<!-- Bottom-edge fade -->
-					<div class="absolute inset-0" style="background: linear-gradient(to top, #0d0d23 0%, transparent 40%);"></div>
+					<img src={t.photo} alt={t.name} class="w-full h-full object-cover object-[center_15%]" />
+					<!-- Bottom fade on mobile (top→bottom layout) -->
+					<div class="absolute inset-0 lg:hidden" style="background: linear-gradient(to bottom, transparent 55%, var(--tm-photo-fade-b) 100%);"></div>
+					<!-- Right-edge fade on desktop (left→right layout) -->
+					<div class="absolute inset-0 hidden lg:block" style="background: linear-gradient(to right, transparent 55%, var(--tm-photo-fade-t) 100%);"></div>
+					<!-- Bottom-edge fade always -->
+					<div class="absolute inset-0" style="background: linear-gradient(to top, var(--tm-photo-fade-b) 0%, transparent 40%);"></div>
 				{:else}
-					<div class="w-full h-full flex items-center justify-center" style="background: linear-gradient(160deg,#1a0a3b,#0d0d23);">
+					<div class="w-full h-full flex items-center justify-center" style="background: var(--tm-bg);">
 						<div class="w-20 h-20 rounded-full flex items-center justify-center text-white font-bold text-2xl" style="background:linear-gradient(135deg,#7c3aed,#a855f7);box-shadow:0 0 30px rgba(124,58,237,0.5);">
 							{getInitials(t.name)}
 						</div>
@@ -273,28 +275,28 @@
 				{/if}
 			</div>
 
-			<!-- Right — header + scrollable content -->
+			<!-- Bottom (mobile/tablet) / Right (desktop) — header + scrollable content -->
 			<div class="flex-1 flex flex-col min-h-0">
 				<!-- Shimmer accent line at top -->
 				<div class="h-1 w-full flex-shrink-0 tm-shimmer-bar"></div>
 
 				<!-- Fixed name/designation header -->
 				<div class="px-7 pt-6 pb-4 flex-shrink-0">
-					<p class="text-white font-bold text-xl leading-tight">{t.name}</p>
+					<p class="font-bold text-xl leading-tight" style="color: var(--tm-name);">{t.name}</p>
 					{#if t.designation}
-						<p class="text-purple-300 text-sm mt-1">{t.designation}</p>
+						<p class="text-sm mt-1" style="color: var(--tm-role);">{t.designation}</p>
 					{/if}
 				</div>
 
 				<!-- Scrollable body — flex-1 + min-h-0 + overscroll-behavior:contain -->
 				<div class="flex-1 overflow-y-auto min-h-0 px-7 pb-7" style="scrollbar-width: thin; scrollbar-color: rgba(124,58,237,0.4) transparent; overscroll-behavior: contain;">
-					<Quote class="w-6 h-6 mb-3 opacity-40" style="color:#a78bfa;" aria-hidden="true" />
-					<p class="text-sjcu-text-secondary text-base leading-relaxed mb-6">"{t.message}"</p>
-					<div class="flex items-center gap-1 pt-4 border-t border-sjcu-border" aria-label="{t.rating} out of 5 stars">
+					<Quote class="w-6 h-6 mb-3" style="color: var(--tm-quote-c);" aria-hidden="true" />
+					<p class="text-base leading-relaxed mb-6" style="color: var(--tm-text);">"{t.message}"</p>
+					<div class="flex items-center gap-1 pt-4" style="border-top: 1px solid var(--tm-divider);" aria-label="{t.rating} out of 5 stars">
 						{#each Array.from({ length: 5 }) as _, si}
 							<Star class="w-4.5 h-4.5 {si < t.rating ? 'text-amber-400 fill-amber-400' : 'text-sjcu-border'}" />
 						{/each}
-						<span class="text-sjcu-text-muted text-xs ml-1.5">{t.rating} / 5</span>
+						<span class="text-xs ml-1.5" style="color: var(--tm-subtext);">{t.rating} / 5</span>
 					</div>
 				</div>
 			</div>
@@ -508,18 +510,59 @@
 
 	/* ── Testimonial view modal ─────────────────────────────────────────────── */
 	.tm-card {
-		background: #0d0d23;
-		border: 1px solid rgba(124, 58, 237, 0.28);
+		--tm-bg:          #0d0d23;
+		--tm-text:        #e2e8f0;
+		--tm-subtext:     #a0aec0;
+		--tm-name:        #fff;
+		--tm-role:        #c4b5fd;
+		--tm-border:      rgba(124, 58, 237, 0.28);
+		--tm-close-bg:    rgba(255, 255, 255, 0.1);
+		--tm-close-hov:   rgba(124, 58, 237, 0.3);
+		--tm-close-bd:    rgba(255, 255, 255, 0.15);
+		--tm-close-c:     #fff;
+		--tm-quote-c:     rgba(167, 139, 250, 0.4);
+		--tm-divider:     rgba(255, 255, 255, 0.08);
+		--tm-photo-fade-b: rgba(13,13,35,0.95);
+		--tm-photo-fade-t: rgba(13,13,35,0.95);
+		background: var(--tm-bg);
+		border: 1px solid var(--tm-border);
 		box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7), 0 0 60px rgba(124, 58, 237, 0.12);
 	}
-	/* Fixed-size photo column — 220px wide, 320px tall max, does not stretch */
+	:global([data-theme="light"]) .tm-card {
+		--tm-bg:          #f5f3ff;
+		--tm-text:        #3b3063;
+		--tm-subtext:     #6b7280;
+		--tm-name:        #1e1b4b;
+		--tm-role:        #7c3aed;
+		--tm-border:      rgba(124, 58, 237, 0.22);
+		--tm-close-bg:    rgba(109, 40, 217, 0.1);
+		--tm-close-hov:   rgba(109, 40, 217, 0.2);
+		--tm-close-bd:    rgba(109, 40, 217, 0.25);
+		--tm-close-c:     #4c1d95;
+		--tm-quote-c:     rgba(124, 58, 237, 0.35);
+		--tm-divider:     rgba(124, 58, 237, 0.15);
+		--tm-photo-fade-b: rgba(245,243,255,0.97);
+		--tm-photo-fade-t: rgba(245,243,255,0.97);
+		box-shadow: 0 24px 60px rgba(0, 0, 0, 0.15), 0 0 40px rgba(124, 58, 237, 0.08);
+	}
+	/* Mobile/tablet: full width, fixed height at top */
 	.tm-photo-col {
-		width: 220px;
-		min-width: 220px;
-		max-height: 320px;
-		align-self: flex-start;
+		width: 100%;
+		height: min(320px, 40vh);
+		flex-shrink: 0;
 		overflow: hidden;
-		border-radius: 1.5rem 0 0 1.5rem;
+		border-radius: 1.5rem 1.5rem 0 0;
+	}
+	/* Desktop: fixed-width column on the left */
+	@media (min-width: 1024px) {
+		.tm-photo-col {
+			width: 220px;
+			min-width: 220px;
+			height: auto;
+			max-height: 320px;
+			align-self: flex-start;
+			border-radius: 1.5rem 0 0 1.5rem;
+		}
 	}
 	.tm-shimmer-bar {
 		background: linear-gradient(90deg, #6d28d9, #a855f7, #3b82f6, #a855f7, #6d28d9);
@@ -529,16 +572,16 @@
 	@keyframes shimmer { to { background-position: -300% 0; } }
 
 	.tm-cover-fade {
-		background: linear-gradient(to top, rgba(13,13,35,0.95) 0%, rgba(13,13,35,0.2) 60%, transparent 100%);
+		background: linear-gradient(to top, var(--tm-photo-fade-b) 0%, rgba(13,13,35,0.2) 60%, transparent 100%);
 	}
 	.tm-close {
-		background: rgba(255, 255, 255, 0.1);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-		color: #fff;
+		background: var(--tm-close-bg);
+		border: 1px solid var(--tm-close-bd);
+		color: var(--tm-close-c);
 		cursor: pointer;
 	}
 	.tm-close:hover {
-		background: rgba(124, 58, 237, 0.3);
+		background: var(--tm-close-hov);
 		border-color: rgba(124, 58, 237, 0.5);
 	}
 	.animate-tm-spring {

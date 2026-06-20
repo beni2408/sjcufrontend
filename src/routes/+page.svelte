@@ -58,15 +58,18 @@
 </script>
 
 <svelte:head>
-	<title>St. John's Carol Union</title>
-	<meta name="description" content="St. John's Carol Union — Harmonies that Transcend Time. Experience the divine through music." />
-	<meta property="og:title" content="St. John's Carol Union" />
-	<meta property="og:description" content="Harmonies that Transcend Time. Experience the divine through music." />
+	<title>St. John's Carol Union — Sing Unto the Lord a New Song</title>
+	<meta name="description" content="St. John's Carol Union — Sing Unto the Lord a New Song. A Christian choir and music ministry from Madathuvilai, Arumuganeri, Tuticorin District, glorifying Christ through song, worship, and musical excellence." />
+	<meta property="og:title" content="St. John's Carol Union — Sing Unto the Lord a New Song" />
+	<meta property="og:description" content="A Christian choir and music ministry from Madathuvilai, Arumuganeri, Tuticorin District — glorifying Christ through song, worship, and musical excellence." />
 	<meta property="og:type" content="website" />
 	<meta property="og:image" content="/logo.png" />
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content="St. John's Carol Union" />
-	<meta name="twitter:description" content="Harmonies that Transcend Time. Experience the divine through music." />
+	<meta name="twitter:title" content="St. John's Carol Union — Sing Unto the Lord a New Song" />
+	<meta name="twitter:description" content="A Christian choir and music ministry from Madathuvilai, Arumuganeri, Tuticorin District — glorifying Christ through song, worship, and musical excellence." />
+	<meta name="keywords" content="St. John's Carol Union, SJCU, Christian choir, worship music, Christ, carol, music ministry, gospel choir, Madathuvilai, Arumuganeri, Tuticorin" />
+	<meta name="geo.region" content="IN-TN" />
+	<meta name="geo.placename" content="Madathuvilai, Arumuganeri, Tuticorin District, Tamil Nadu, India" />
 </svelte:head>
 
 {#if !ready}

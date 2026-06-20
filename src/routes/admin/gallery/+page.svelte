@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Upload, Trash2, Image, GripVertical, Save, Video, Play } from 'lucide-svelte';
-	import { galleryApi } from '$lib/services/api.js';
+	import { Upload, Trash2, Image, GripVertical, Save, Video, Play, Shuffle } from 'lucide-svelte';
+	import { galleryApi, settingsApi } from '$lib/services/api.js';
 	import type { GalleryItem } from '$lib/types/index.js';
 	import LoadingSpinner from '$lib/components/ui/LoadingSpinner.svelte';
 	import { showToast } from '$lib/stores/ui.js';
@@ -13,6 +13,8 @@
 	let addingVideo = $state(false);
 	let savingOrder = $state(false);
 	let orderChanged = $state(false);
+	let shuffled = $state(false);
+	let savingShuffled = $state(false);
 
 	// image upload form
 	let uploadFiles = $state<FileList | null>(null);
@@ -39,10 +41,25 @@
 	async function load() {
 		loading = true;
 		orderChanged = false;
-		try { const res = await galleryApi.getAll(); items = res.data.data.gallery || []; }
-		catch { items = []; } finally { loading = false; }
+		try {
+			const [galleryRes, settingsRes] = await Promise.all([galleryApi.getAll(), settingsApi.get()]);
+			items = galleryRes.data.data.gallery || [];
+			shuffled = settingsRes.data.data.settings?.galleryShuffled ?? false;
+		} catch { items = []; } finally { loading = false; }
 	}
 	onMount(load);
+
+	async function toggleShuffle() {
+		savingShuffled = true;
+		try {
+			const fd = new FormData();
+			fd.append('galleryShuffled', String(!shuffled));
+			await settingsApi.update(fd);
+			shuffled = !shuffled;
+			showToast(shuffled ? 'Shuffle view enabled' : 'Shuffle view disabled', 'success');
+		} catch { showToast('Failed to update shuffle setting', 'error'); }
+		finally { savingShuffled = false; }
+	}
 
 	// ── Drag & Drop ──────────────────────────────────────────────────
 	function onDragStart(e: DragEvent, index: number) {
@@ -142,12 +159,28 @@
 			<h2 class="font-display text-2xl font-bold text-white">Media Gallery</h2>
 			<p class="text-sjcu-text-muted text-sm">{items.length} total items</p>
 		</div>
-		{#if orderChanged && isDraggable}
-			<button onclick={saveOrder} disabled={savingOrder} class="btn-primary text-sm gap-2 self-start sm:self-auto">
-				<Save class="w-4 h-4" />
-				{savingOrder ? 'Saving...' : 'Save Order'}
+		<div class="flex items-center gap-3 flex-wrap">
+			<!-- Shuffle toggle -->
+			<button
+				onclick={toggleShuffle}
+				disabled={savingShuffled}
+				class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all duration-200
+					{shuffled
+						? 'bg-sjcu-purple/20 text-sjcu-accent border-sjcu-purple/50'
+						: 'bg-transparent text-sjcu-text-muted border-sjcu-border hover:border-sjcu-purple/40 hover:text-sjcu-text-primary'}"
+				title="Toggle shuffle view for visitors"
+			>
+				<Shuffle class="w-4 h-4" />
+				{savingShuffled ? 'Saving...' : shuffled ? 'Shuffle: On' : 'Shuffle: Off'}
 			</button>
-		{/if}
+
+			{#if orderChanged && isDraggable}
+				<button onclick={saveOrder} disabled={savingOrder} class="btn-primary text-sm gap-2">
+					<Save class="w-4 h-4" />
+					{savingOrder ? 'Saving...' : 'Save Order'}
+				</button>
+			{/if}
+		</div>
 	</div>
 
 	<!-- Upload forms — side by side on larger screens -->

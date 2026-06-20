@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { galleryApi } from '$lib/services/api.js';
+	import { galleryApi, settingsApi } from '$lib/services/api.js';
 	import type { GalleryItem } from '$lib/types/index.js';
 	import LoadingSpinner from '$lib/components/ui/LoadingSpinner.svelte';
 	import { X, Play, ChevronLeft, ChevronRight, Images } from 'lucide-svelte';
@@ -46,10 +46,21 @@
 		if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
 	}
 
+	function shuffleArray<T>(arr: T[]): T[] {
+		const a = [...arr];
+		for (let i = a.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[a[i], a[j]] = [a[j], a[i]];
+		}
+		return a;
+	}
+
 	onMount(async () => {
 		try {
-			const res = await galleryApi.getAll();
-			items = res.data.data.gallery || [];
+			const [galleryRes, settingsRes] = await Promise.all([galleryApi.getAll(), settingsApi.get()]);
+			const raw: GalleryItem[] = galleryRes.data.data.gallery || [];
+			const isShuffled = settingsRes.data.data.settings?.galleryShuffled ?? false;
+			items = isShuffled ? shuffleArray(raw) : raw;
 		} catch {
 			items = [];
 		} finally {
