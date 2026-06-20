@@ -1,0 +1,698 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Theme CSS variables ─────────────────────────────────────────────────── */
+
+:root {
+  /* Dark theme (default) — space-separated RGB for Tailwind opacity support */
+  --sjcu-dark:           5 5 15;
+  --sjcu-navy:           10 10 26;
+  --sjcu-navy-2:         13 13 35;
+  --sjcu-card:           17 17 40;
+  --sjcu-card-2:         22 22 58;
+  --sjcu-border:         30 30 74;
+  --sjcu-purple:         124 58 237;
+  --sjcu-purple-light:   139 92 246;
+  --sjcu-purple-dim:     76 29 149;
+  --sjcu-violet:         109 40 217;
+  --sjcu-accent:         167 139 250;
+  --sjcu-accent-2:       196 181 253;
+  --sjcu-gold:           245 158 11;
+  --sjcu-text-primary:   241 245 249;
+  --sjcu-text-secondary: 148 163 184;
+  --sjcu-text-muted:     100 116 139;
+
+  /* Particle / floating-note color (RGB) */
+  --note-r: 167; --note-g: 139; --note-b: 250;
+}
+
+[data-theme="light"] {
+  --sjcu-dark:           253 248 255;   /* #fdf8ff creamy lavender-white */
+  --sjcu-navy:           243 237 255;   /* #f3edff */
+  --sjcu-navy-2:         237 228 253;   /* #ede4fd */
+  --sjcu-card:           255 255 255;   /* #ffffff */
+  --sjcu-card-2:         248 244 255;   /* #f8f4ff */
+  --sjcu-border:         214 190 252;   /* #d6befc light purple border */
+  --sjcu-purple:         124 58 237;    /* unchanged */
+  --sjcu-purple-light:   139 92 246;    /* unchanged */
+  --sjcu-purple-dim:     109 40 217;    /* #6d28d9 */
+  --sjcu-violet:         109 40 217;
+  --sjcu-accent:         109 40 217;    /* #6d28d9 — darker on light bg */
+  --sjcu-accent-2:       91 33 182;     /* #5b21b6 */
+  --sjcu-gold:           180 83 9;      /* #b45309 darker amber */
+  --sjcu-text-primary:   30 27 75;      /* #1e1b4b dark indigo */
+  --sjcu-text-secondary: 74 55 112;     /* #4a3770 */
+  --sjcu-text-muted:     124 112 168;   /* #7c70a8 */
+
+  --note-r: 109; --note-g: 40; --note-b: 217;
+}
+
+/* ── Base layer ──────────────────────────────────────────────────────────── */
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  body {
+    background-color: rgb(var(--sjcu-dark));
+    color: rgb(var(--sjcu-text-primary));
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  ::selection {
+    background: rgba(124, 58, 237, 0.35);
+    color: #fff;
+  }
+  [data-theme="light"] ::selection {
+    background: rgba(124, 58, 237, 0.2);
+    color: #1e1b4b;
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: rgb(var(--sjcu-navy)); }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--sjcu-purple-dim));
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: rgb(var(--sjcu-purple)); }
+}
+
+/* ── Components ──────────────────────────────────────────────────────────── */
+
+@layer components {
+  .glass-card {
+    @apply bg-sjcu-card/60 backdrop-blur-md border border-sjcu-border/50 rounded-2xl;
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05), 0 20px 60px rgba(0, 0, 0, 0.4);
+  }
+  [data-theme="light"] .glass-card {
+    box-shadow: inset 0 1px 0 0 rgba(124, 58, 237, 0.08), 0 20px 60px rgba(124, 58, 237, 0.07);
+  }
+
+  .glass-card-hover {
+    @apply glass-card transition-all duration-500;
+  }
+  .glass-card-hover:hover {
+    @apply border-sjcu-purple/40;
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(124, 58, 237, 0.15);
+    transform: translateY(-4px);
+  }
+  [data-theme="light"] .glass-card-hover:hover {
+    box-shadow: inset 0 1px 0 0 rgba(124, 58, 237, 0.12), 0 20px 60px rgba(124, 58, 237, 0.1), 0 0 40px rgba(124, 58, 237, 0.12);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-7 py-3.5 bg-sjcu-purple hover:bg-sjcu-purple-light text-white font-semibold rounded-full transition-all duration-300;
+    box-shadow: 0 0 30px rgba(124, 58, 237, 0.4);
+  }
+  .btn-primary:hover {
+    box-shadow: 0 0 50px rgba(124, 58, 237, 0.6);
+    transform: translateY(-2px);
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center gap-2 px-7 py-3.5 border border-sjcu-purple/50 hover:border-sjcu-purple text-white font-semibold rounded-full transition-all duration-300;
+  }
+  .btn-outline:hover {
+    @apply bg-sjcu-purple/10;
+    transform: translateY(-2px);
+  }
+  [data-theme="light"] .btn-outline {
+    color: rgb(var(--sjcu-accent));
+  }
+
+  .section-title {
+    @apply font-display text-3xl md:text-4xl lg:text-5xl font-bold text-sjcu-text-primary leading-tight;
+  }
+
+  .section-subtitle {
+    @apply text-sjcu-text-secondary text-base md:text-lg max-w-2xl;
+  }
+
+  .section-tag {
+    @apply inline-flex items-center gap-2 text-sjcu-accent text-sm font-semibold tracking-widest uppercase mb-4;
+  }
+  .section-tag::before {
+    content: '';
+    @apply w-8 h-px bg-sjcu-purple block;
+  }
+
+  .purple-dot {
+    @apply w-1.5 h-1.5 rounded-full bg-sjcu-purple animate-pulse-slow;
+  }
+
+  .admin-sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-sjcu-text-secondary hover:text-sjcu-text-primary hover:bg-sjcu-purple/20 transition-all duration-200 text-sm font-medium;
+    position: relative;
+  }
+  .admin-sidebar-link::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 20%; bottom: 20%;
+    width: 2.5px;
+    border-radius: 0 2px 2px 0;
+    background: rgb(var(--sjcu-purple));
+    transform: scaleY(0);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: center;
+  }
+  .admin-sidebar-link:not(.active):hover::before {
+    transform: scaleY(1);
+  }
+  .admin-sidebar-link.active {
+    @apply text-white bg-sjcu-purple/30 border border-sjcu-purple/40;
+  }
+  .admin-sidebar-link.active::before {
+    transform: scaleY(1);
+  }
+
+  /* ── Micro-animation utilities ─────────────────────────────────── */
+
+  /* Click ripple — element needs overflow:hidden */
+  .card-ripple {
+    position: relative;
+  }
+  .card-ripple::after {
+    content: '';
+    position: absolute;
+    width: 130%;
+    aspect-ratio: 1;
+    top: 50%; left: 50%;
+    border-radius: 50%;
+    background: rgba(124, 58, 237, 0.22);
+    transform: translate(-50%, -50%) scale(0);
+    pointer-events: none;
+    z-index: 10;
+  }
+  .card-ripple:active::after {
+    animation: rippleExpand 0.55s ease-out forwards;
+  }
+
+  /* Ring pulse on hover — box-shadow so clip doesn't cut it */
+  .card-ring-hover:hover {
+    animation: ringPulse 1.8s ease-out infinite;
+  }
+
+  /* Glow pulse for CTA / action buttons */
+  .btn-glow-hover:hover {
+    animation: glowPulse 1.4s ease-in-out infinite;
+  }
+
+  /* Navbar link animated underline */
+  .nav-link {
+    position: relative;
+  }
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 2px; left: 50%;
+    width: 0; height: 2px;
+    background: linear-gradient(to right, transparent, rgb(var(--sjcu-accent)), transparent);
+    border-radius: 1px;
+    transform: translateX(-50%);
+    transition: width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .nav-link:hover::after { width: 55%; }
+
+  /* Tag/pill shimmer sweep — add to any badge, pill, or filter button */
+  .tag-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .tag-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%);
+    transform: translateX(-110%);
+    pointer-events: none;
+  }
+  .tag-shimmer:hover::after {
+    animation: shimmerSweep 0.65s ease-out forwards;
+  }
+
+  /* Image scan line — add to image containers */
+  .img-scan {
+    position: relative;
+    overflow: hidden;
+  }
+  .img-scan::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 45%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent);
+    transform: skewX(-18deg);
+    pointer-events: none;
+  }
+  .img-scan:hover::after {
+    animation: scanLine 0.75s ease-out forwards;
+  }
+
+  /* Icon spring bounce — add to icon wrapper elements */
+  .icon-bounce:hover {
+    animation: iconSpring 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .icon-bounce {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Scroll progress bar */
+  .scroll-progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2.5px;
+    background: linear-gradient(to right, rgb(var(--sjcu-purple)), rgb(var(--sjcu-accent)), #c084fc);
+    box-shadow: 0 0 10px rgba(167,139,250,0.7);
+    z-index: 9999;
+    transition: width 0.1s linear;
+    border-radius: 0 2px 2px 0;
+  }
+  [data-theme="light"] .scroll-progress-bar {
+    box-shadow: 0 0 8px rgba(109,40,217,0.5);
+  }
+
+  .admin-card {
+    @apply rounded-2xl p-6;
+    position: relative;
+    background:
+      radial-gradient(ellipse at 0% 0%, rgba(124, 58, 237, 0.08) 0%, transparent 52%),
+      rgb(var(--sjcu-card));
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .admin-card:hover {
+    border-color: rgba(124, 58, 237, 0.32);
+    box-shadow:
+      0 0 0 1px rgba(124, 58, 237, 0.12),
+      0 8px 28px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transform: translateY(-1px);
+  }
+
+  /* ── Draggable list-row card (productions, events, etc.) ──────────────── */
+  /* Targets admin-cards that are also drag rows (they carry cursor-grab)    */
+  .admin-card.cursor-grab::after,
+  .admin-card.select-none::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: linear-gradient(to bottom, #7c3aed, #a855f7);
+    transform: scaleY(0);
+    transform-origin: center;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+  }
+  .admin-card.cursor-grab:hover::after,
+  .admin-card.select-none:hover::after {
+    transform: scaleY(1);
+  }
+
+  .admin-input {
+    @apply w-full bg-sjcu-navy-2 border border-sjcu-border text-sjcu-text-primary placeholder-sjcu-text-muted rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-sjcu-purple transition-colors duration-200;
+  }
+  .admin-input:focus {
+    animation: focusRingPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.18);
+  }
+
+  .admin-select {
+    @apply w-full bg-sjcu-navy-2 border border-sjcu-border text-sjcu-text-primary rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-sjcu-purple transition-colors duration-200;
+  }
+  .admin-select:focus {
+    animation: focusRingPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.18);
+  }
+
+  .stat-card {
+    @apply admin-card flex flex-col gap-2;
+    background:
+      radial-gradient(ellipse at top left, rgba(124, 58, 237, 0.14) 0%, transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(168, 85, 247, 0.05) 0%, transparent 55%),
+      rgb(var(--sjcu-card));
+    box-shadow:
+      inset 0 1px 0 rgba(124, 58, 237, 0.35),
+      inset 1px 0 0 rgba(124, 58, 237, 0.1),
+      0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+  .stat-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(124, 58, 237, 0.45);
+    box-shadow:
+      inset 0 1px 0 rgba(124, 58, 237, 0.5),
+      inset 1px 0 0 rgba(124, 58, 237, 0.15),
+      0 0 0 1px rgba(124, 58, 237, 0.18),
+      0 14px 32px rgba(0, 0, 0, 0.5),
+      0 0 24px rgba(124, 58, 237, 0.12);
+  }
+
+  /* ── Member grid card — photo ring + center glow on hover ─────────────── */
+  .admin-card.flex-col.items-center img,
+  .admin-card.flex-col.items-center .rounded-full {
+    transition: box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .admin-card.flex-col.items-center:hover img,
+  .admin-card.flex-col.items-center:hover .rounded-full {
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.5), 0 0 16px rgba(124, 58, 237, 0.25);
+    transform: scale(1.05);
+  }
+  .admin-card.flex-col.items-center:hover {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(124, 58, 237, 0.13) 0%, transparent 60%),
+      radial-gradient(ellipse at 0% 0%, rgba(124, 58, 237, 0.06) 0%, transparent 52%),
+      rgb(var(--sjcu-card));
+    transform: translateY(-3px);
+  }
+
+  .badge-pending {
+    @apply px-2 py-1 text-xs font-semibold bg-yellow-500/20 text-yellow-400 rounded-full;
+  }
+  .badge-contacted {
+    @apply px-2 py-1 text-xs font-semibold bg-blue-500/20 text-blue-400 rounded-full;
+  }
+  .badge-completed {
+    @apply px-2 py-1 text-xs font-semibold bg-green-500/20 text-green-400 rounded-full;
+  }
+}
+
+/* ── Micro-animation keyframes ───────────────────────────────────────────── */
+
+@keyframes rippleExpand {
+  from { transform: translate(-50%, -50%) scale(0); opacity: 0.6; }
+  to   { transform: translate(-50%, -50%) scale(2.6); opacity: 0; }
+}
+
+/* ── Conic rotating gradient border ─────────────────────────────────────── */
+/* @property lets us animate the angle inside conic-gradient               */
+
+@property --ba {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes borderSpin { to { --ba: 360deg; } }
+
+.conic-border {
+  position: relative;
+  isolation: isolate;
+}
+.conic-border::before {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from var(--ba), #7c3aed 0%, #a855f7 25%, #c084fc 50%, #a855f7 75%, #7c3aed 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  animation: borderSpin 3.5s linear infinite paused;
+}
+.conic-border:hover::before,
+.conic-border.active::before {
+  opacity: 1;
+  animation-play-state: running;
+}
+
+/* ── Utilities ───────────────────────────────────────────────────────────── */
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-sjcu-accent via-white to-sjcu-accent-2 bg-clip-text text-transparent;
+  }
+  [data-theme="light"] .text-gradient {
+    background-image: linear-gradient(to right, #7c3aed, #9333ea, #6d28d9);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .purple-gradient-text {
+    background-image: linear-gradient(to right, #7c3aed, #a855f7, #9333ea, #7c3aed);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradientFlow 5s ease-in-out infinite;
+  }
+  [data-theme="light"] .purple-gradient-text {
+    background-image: linear-gradient(to right, #6d28d9, #a855f7, #7c3aed, #6d28d9);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradientFlow 5s ease-in-out infinite;
+  }
+
+  .noise-overlay {
+    position: relative;
+  }
+  .noise-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.04;
+    z-index: 0;
+  }
+}
+
+/* ── Light mode: Explicit section & layout backgrounds ──────────────────── */
+/* These are belt-and-suspenders overrides. The Tailwind bg-sjcu-* classes   */
+/* already reference CSS variables, but explicit selectors guarantee the     */
+/* backgrounds flip visibly when data-theme="light" is active.               */
+
+[data-theme="light"] #about,
+[data-theme="light"] #members,
+[data-theme="light"] #gallery,
+[data-theme="light"] #memorable,
+[data-theme="light"] #upcoming-projects,
+[data-theme="light"] #enquiry-cta {
+  background-color: rgb(var(--sjcu-dark));
+}
+
+[data-theme="light"] #productions,
+[data-theme="light"] #events,
+[data-theme="light"] #testimonials,
+[data-theme="light"] #partners {
+  background-color: rgb(var(--sjcu-navy-2));
+}
+
+[data-theme="light"] footer {
+  background-color: rgb(var(--sjcu-navy));
+  border-top-color: rgba(124, 58, 237, 0.2);
+}
+
+/* ── Light mode: Admin layout ────────────────────────────────────────────── */
+
+/* Admin sidebar & top bar */
+[data-theme="light"] aside {
+  background-color: rgb(var(--sjcu-navy));
+  border-right-color: rgba(124, 58, 237, 0.15);
+}
+[data-theme="light"] header {
+  background-color: rgb(var(--sjcu-navy));
+  border-bottom-color: rgba(124, 58, 237, 0.15);
+}
+
+/* Admin layout wrapper & main content area */
+[data-theme="light"] .bg-sjcu-dark {
+  background-color: rgb(var(--sjcu-dark));
+}
+[data-theme="light"] .bg-sjcu-navy {
+  background-color: rgb(var(--sjcu-navy));
+}
+[data-theme="light"] .bg-sjcu-navy-2 {
+  background-color: rgb(var(--sjcu-navy-2));
+}
+[data-theme="light"] .bg-sjcu-card {
+  background-color: rgb(var(--sjcu-card));
+}
+[data-theme="light"] .bg-sjcu-card-2 {
+  background-color: rgb(var(--sjcu-card-2));
+}
+
+/* Admin cards */
+[data-theme="light"] .admin-card {
+  background:
+    radial-gradient(ellipse at 0% 0%, rgba(124, 58, 237, 0.05) 0%, transparent 52%),
+    rgb(var(--sjcu-card));
+  border-color: rgba(124, 58, 237, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(124, 58, 237, 0.06);
+}
+[data-theme="light"] .admin-card:hover {
+  border-color: rgba(124, 58, 237, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(124, 58, 237, 0.12),
+    0 6px 20px rgba(124, 58, 237, 0.1),
+    inset 0 1px 0 rgba(124, 58, 237, 0.08);
+}
+[data-theme="light"] .stat-card {
+  background:
+    radial-gradient(ellipse at top left, rgba(124, 58, 237, 0.1) 0%, transparent 55%),
+    rgb(var(--sjcu-card));
+  box-shadow:
+    inset 0 1px 0 rgba(124, 58, 237, 0.4),
+    inset 1px 0 0 rgba(124, 58, 237, 0.12),
+    0 2px 8px rgba(124, 58, 237, 0.08);
+}
+
+/* ── Light mode: Glass cards — explicit white/lavender surface ──────────── */
+
+[data-theme="light"] .glass-card {
+  background-color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(124, 58, 237, 0.18);
+}
+
+[data-theme="light"] .glass-card-hover {
+  background-color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(124, 58, 237, 0.18);
+}
+
+/* ── Light mode: Navbar background ──────────────────────────────────────── */
+/* bg-sjcu-navy/90 is a Tailwind opacity variant — different compiled class   */
+/* from bg-sjcu-navy, so it doesn't switch. Override the nav element directly */
+/* so the background is always light/readable in light mode (scrolled or not) */
+
+[data-theme="light"] nav {
+  background-color: rgba(253, 248, 255, 0.92) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom-color: rgba(214, 190, 252, 0.4);
+}
+
+/* ── Light mode: Text color utility class overrides ─────────────────────── */
+
+[data-theme="light"] .text-sjcu-text-primary   { color: rgb(var(--sjcu-text-primary)); }
+[data-theme="light"] .text-sjcu-text-secondary { color: rgb(var(--sjcu-text-secondary)); }
+[data-theme="light"] .text-sjcu-text-muted     { color: rgb(var(--sjcu-text-muted)); }
+[data-theme="light"] .text-sjcu-accent         { color: rgb(var(--sjcu-accent)); }
+[data-theme="light"] .text-sjcu-accent-2       { color: rgb(var(--sjcu-accent-2)); }
+[data-theme="light"] .text-sjcu-gold           { color: rgb(var(--sjcu-gold)); }
+
+/* Border color overrides */
+[data-theme="light"] .border-sjcu-border { border-color: rgb(var(--sjcu-border)); }
+[data-theme="light"] .border-sjcu-purple { border-color: rgb(var(--sjcu-purple)); }
+
+/* Partners card — bg-sjcu-card/60 opacity variant is a different compiled class
+   than .bg-sjcu-card, so the earlier override didn't cover the partner card button */
+[data-theme="light"] .partner-card {
+  background-color: rgb(var(--sjcu-card));
+}
+
+/* ── Light mode hero gradient override ──────────────────────────────────── */
+
+[data-theme="light"] .bg-hero-gradient {
+  background-image: radial-gradient(ellipse at top, #e8d8ff 0%, #fdf8ff 65%);
+}
+
+/* ── Light mode: flip-clock widget ─────────────────────────────────────── */
+
+[data-theme="light"] :global(.flip-clock-wrap) {
+  background: rgba(240, 232, 255, 0.92) !important;
+  border-color: rgba(124, 58, 237, 0.35) !important;
+  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+[data-theme="light"] :global(.flip-clock-label) {
+  color: rgba(109, 40, 217, 0.7) !important;
+}
+[data-theme="light"] :global(.flip-digit-wrap) {
+  background: rgba(124, 58, 237, 0.12) !important;
+  border-color: rgba(124, 58, 237, 0.35) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 rgba(124, 58, 237, 0.1) !important;
+}
+[data-theme="light"] :global(.flip-digit) {
+  color: #6d28d9 !important;
+}
+[data-theme="light"] :global(.flip-unit-label) {
+  color: rgba(124, 58, 237, 0.6) !important;
+}
+[data-theme="light"] :global(.flip-colon) {
+  color: rgba(124, 58, 237, 0.5) !important;
+}
+[data-theme="light"] :global(.flip-live-badge) {
+  background: rgba(240, 253, 244, 0.92) !important;
+  border-color: rgba(34, 197, 94, 0.4) !important;
+}
+
+/* ── Light mode: admin pages — broad text-white overrides ─────────────────── */
+
+/* All headings and semantic text in admin main/header/cards */
+[data-theme="light"] main h1,
+[data-theme="light"] main h2,
+[data-theme="light"] main h3,
+[data-theme="light"] main h4,
+[data-theme="light"] header h1,
+[data-theme="light"] header h2,
+[data-theme="light"] .admin-card h1,
+[data-theme="light"] .admin-card h2,
+[data-theme="light"] .admin-card h3,
+[data-theme="light"] .admin-card h4 {
+  color: rgb(var(--sjcu-text-primary));
+}
+
+/* List-item text in admin rows — p/span with text-white that are semantic names */
+[data-theme="light"] main p.text-white,
+[data-theme="light"] main span.text-white,
+[data-theme="light"] .admin-card p.text-white,
+[data-theme="light"] .admin-card span.text-white {
+  color: rgb(var(--sjcu-text-primary));
+}
+
+/* Exception: buttons and badge elements keep white text on colored backgrounds */
+[data-theme="light"] .btn-primary,
+[data-theme="light"] .btn-primary *,
+[data-theme="light"] button.bg-sjcu-purple,
+[data-theme="light"] button.bg-sjcu-purple *,
+[data-theme="light"] button.bg-green-600,
+[data-theme="light"] button.bg-green-600 *,
+[data-theme="light"] button.bg-red-500,
+[data-theme="light"] button.bg-red-500 *,
+[data-theme="light"] .admin-sidebar-link.active {
+  color: #ffffff;
+}
+
+/* Exception: image overlays, video overlays keep white */
+[data-theme="light"] .absolute.text-white,
+[data-theme="light"] img ~ span.text-white,
+[data-theme="light"] [style*="bg-black"] .text-white,
+[data-theme="light"] [style*="bg-black/60"] {
+  color: #ffffff;
+}
+
+/* ── Transition for smooth theme switching ──────────────────────────────── */
+
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 0.25s;
+  transition-timing-function: ease;
+}
+/* Exclude transitions on animations/transforms so they don't break */
+[class*="animate-"],
+canvas,
+.hero-mic,
+.hero-headphones,
+.eq-bar,
+.sound-ring {
+  transition: none !important;
+}
