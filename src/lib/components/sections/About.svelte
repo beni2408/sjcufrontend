@@ -133,7 +133,7 @@
 								<h3 class="font-display text-lg font-bold text-white mb-3 leading-snug mt-1">
 									{entry.title}
 								</h3>
-								<p class="text-sjcu-text-secondary text-sm leading-relaxed">{entry.body}</p>
+								<p class="text-sjcu-text-secondary text-sm leading-relaxed text-justify">{entry.body}</p>
 							</div>
 						</li>
 					{/each}

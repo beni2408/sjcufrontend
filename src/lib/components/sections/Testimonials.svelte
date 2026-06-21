@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Star, Quote, X } from 'lucide-svelte';
+	import { Star, Quote, X, PenLine } from 'lucide-svelte';
 	import Reveal from '$lib/components/ui/Reveal.svelte';
 	import FloatingNotes from '$lib/components/ui/FloatingNotes.svelte';
 	import { testimonialsApi } from '$lib/services/api.js';
@@ -36,8 +36,22 @@
 		}
 	});
 
-	// Duplicate array for seamless infinite loop (translateX(-50%) snaps back invisibly)
-	const looped = $derived([...testimonials, ...testimonials]);
+	// Only duplicate for seamless loop when cards overflow the container
+	let needsLoop = $state(false);
+	let trackEl = $state<HTMLDivElement | undefined>(undefined);
+	let outerEl = $state<HTMLDivElement | undefined>(undefined);
+
+	const displayList = $derived(needsLoop ? [...testimonials, ...testimonials] : testimonials);
+
+	// After testimonials load + DOM paints, check if single-copy overflows
+	$effect(() => {
+		if (!testimonials.length || !trackEl || !outerEl) return;
+		requestAnimationFrame(() => {
+			if (trackEl && outerEl) {
+				needsLoop = trackEl.scrollWidth > outerEl.clientWidth;
+			}
+		});
+	});
 
 	// ~7s per card visible, minimum 24s total loop duration
 	const duration = $derived(Math.max(testimonials.length * 7, 24));
@@ -157,19 +171,22 @@
 	{:else}
 		<!-- Marquee wall ─────────────────────────────────────────────────────── -->
 		<div
+			bind:this={outerEl}
 			class="marquee-outer"
+			class:marquee-centered={!needsLoop}
 			role="region"
 			aria-label="Audience testimonials"
 		>
 			<div
+				bind:this={trackEl}
 				class="marquee-track"
-				style="--duration: {duration}s"
+				style="--duration: {duration}s; animation-play-state: {needsLoop ? 'running' : 'paused'};"
 			>
-				{#each looped as t, i}
+				{#each displayList as t, i}
 					{@const isLong = t.message.length > TRUNCATE_AT}
 					{@const preview = isLong ? t.message.slice(0, TRUNCATE_AT).trimEnd() + '…' : t.message}
 
-					<div class="card-slot" aria-hidden={i >= testimonials.length ? 'true' : undefined}>
+					<div class="card-slot" aria-hidden={needsLoop && i >= testimonials.length ? 'true' : undefined}>
 						<figure class="testimonial-card glass-card-hover relative w-[300px] h-[360px] flex-shrink-0 text-center flex flex-col pt-12 pb-6 px-6 rounded-2xl">
 
 							<!-- Floating avatar ───────────────────────────────────────── -->
@@ -231,8 +248,9 @@
 	<!-- Review Us CTA -->
 	<div class="text-center mt-16 max-w-7xl mx-auto px-6">
 		<p class="text-sjcu-text-muted text-sm mb-4">Enjoyed our music? Share your experience.</p>
-		<button onclick={openReview} class="btn-primary">
-			✍️ Write a Review
+		<button onclick={openReview} class="btn-primary inline-flex items-center gap-2">
+			<PenLine class="w-4 h-4" />
+			Write a Review
 		</button>
 	</div>
 </section>
@@ -454,6 +472,19 @@
 	}
 	.marquee-track:hover {
 		animation-play-state: paused;
+	}
+
+	/* Center cards when they don't overflow (no loop needed) */
+	.marquee-centered {
+		display: flex;
+		justify-content: center;
+		-webkit-mask-image: none;
+		mask-image: none;
+	}
+	.marquee-centered .marquee-track {
+		width: auto;
+		flex-wrap: wrap;
+		justify-content: center;
 	}
 
 	.card-slot {

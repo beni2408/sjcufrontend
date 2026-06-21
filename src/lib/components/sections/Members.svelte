@@ -10,6 +10,7 @@
 
 	let members = $state<Member[]>([]);
 	let loading = $state(true);
+	let showAllMobile = $state(false);
 
 	const men   = $derived(members.filter(m => m.gender !== 'Female'));
 	const women = $derived(members.filter(m => m.gender === 'Female'));
@@ -76,48 +77,32 @@
 				<p>No members added yet.</p>
 			</div>
 		{:else}
-			{#each [{ label: 'Men', accent: 'from-blue-500/20 to-blue-600/10', border: 'rgba(59,130,246,0.3)', list: men }, { label: 'Female Vocals', accent: 'from-pink-500/20 to-pink-600/10', border: 'rgba(236,72,153,0.3)', list: women }] as section}
-				{#if section.list.length > 0}
-					<!-- Section divider -->
-					<div class="flex items-center gap-4 mb-8 {section.label === 'Women' ? 'mt-20' : ''}">
-						<div class="flex-1 h-px" style="background: linear-gradient(to right, transparent, {section.border}, transparent);"></div>
-						<span class="px-5 py-2 rounded-full text-sm font-bold tracking-widest uppercase bg-gradient-to-r {section.accent} border"
-							style="border-color: {section.border}; color: {section.label === 'Female Vocals' ? '#f9a8d4' : '#93c5fd'};">
-							 {section.label}
-						</span>
-						<div class="flex-1 h-px" style="background: linear-gradient(to left, transparent, {section.border}, transparent);"></div>
-					</div>
-
-					<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-						{#each section.list as member}
+			<!-- ── MOBILE ONLY: first 3 + vignette + show all button ── -->
+			<div class="sm:hidden">
+				<div class="relative">
+					<div class="grid grid-cols-1 gap-8">
+						{#each (showAllMobile ? members : members.slice(0, 3)) as member}
 							<button
 								onclick={() => openProfile(member)}
-								use:tilt={{ max: 7, liftY: 5 }}
 								class="member-card card-ripple card-ring-hover group relative overflow-hidden rounded-3xl text-left w-full {member.slug ? 'cursor-pointer' : 'cursor-default'}"
 								style="height: 520px;"
 							>
 								{#if member.photo}
-									<img
-										src={member.photo}
-										alt={member.name}
+									<img src={member.photo} alt={member.name}
 										class="absolute inset-0 w-full h-full object-cover object-top group-hover:scale-110 transition-transform duration-700 ease-out"
-										loading="lazy"
-									/>
+										loading="lazy" />
 								{:else}
 									<div class="absolute inset-0 bg-gradient-to-br from-sjcu-purple/30 to-sjcu-navy flex items-center justify-center">
 										<UserCircle2 class="w-32 h-32 text-white/20" />
 									</div>
 								{/if}
-
 								<div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent member-photo-overlay"></div>
 								<div class="absolute inset-0 bg-sjcu-purple/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
 								<div class="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
 									<span class="member-card-badge px-3 py-1.5 rounded-full backdrop-blur-sm text-xs font-medium">
-									{member.slug ? 'View Profile' : 'Profile Coming Soon'}
-								</span>
+										{member.slug ? 'View Profile' : 'Profile Coming Soon'}
+									</span>
 								</div>
-
 								<div class="absolute bottom-0 left-0 right-0 p-8 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
 									<h4 class="text-white font-display font-bold text-3xl mb-1 leading-tight">{member.name}</h4>
 									<p class="text-sjcu-accent text-base font-medium mb-5">{member.position}</p>
@@ -131,19 +116,106 @@
 										{/each}
 									</div>
 								</div>
-
 								<div class="absolute inset-0 rounded-3xl ring-0 group-hover:ring-2 group-hover:ring-sjcu-purple/60 transition-all duration-500 pointer-events-none"></div>
 							</button>
 						{/each}
 					</div>
+
+					<!-- Vignette fade — only when collapsed -->
+					{#if !showAllMobile && members.length > 3}
+						<div class="mobile-members-vignette pointer-events-none"></div>
+					{/if}
+				</div>
+
+				<!-- Show All button — only when collapsed and there are more -->
+				{#if !showAllMobile && members.length > 3}
+					<div class="flex justify-center mt-2">
+						<button
+							onclick={() => (showAllMobile = true)}
+							class="btn-primary px-8 py-3 text-sm"
+						>
+							Show All {members.length} Members
+						</button>
+					</div>
 				{/if}
-			{/each}
+			</div>
+
+			<!-- ── DESKTOP (sm+): existing sectioned layout, completely unchanged ── -->
+			<div class="hidden sm:block">
+				{#each [{ label: 'Men', accent: 'from-blue-500/20 to-blue-600/10', border: 'rgba(59,130,246,0.3)', list: men }, { label: 'Female Vocals', accent: 'from-pink-500/20 to-pink-600/10', border: 'rgba(236,72,153,0.3)', list: women }] as section}
+					{#if section.list.length > 0}
+						<div class="flex items-center gap-4 mb-8 {section.label === 'Women' ? 'mt-20' : ''}">
+							<div class="flex-1 h-px" style="background: linear-gradient(to right, transparent, {section.border}, transparent);"></div>
+							<span class="px-5 py-2 rounded-full text-sm font-bold tracking-widest uppercase bg-gradient-to-r {section.accent} border"
+								style="border-color: {section.border}; color: {section.label === 'Female Vocals' ? '#f9a8d4' : '#93c5fd'};">
+								{section.label}
+							</span>
+							<div class="flex-1 h-px" style="background: linear-gradient(to left, transparent, {section.border}, transparent);"></div>
+						</div>
+						<div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-8">
+							{#each section.list as member}
+								<button
+									onclick={() => openProfile(member)}
+									use:tilt={{ max: 7, liftY: 5 }}
+									class="member-card card-ripple card-ring-hover group relative overflow-hidden rounded-3xl text-left w-full {member.slug ? 'cursor-pointer' : 'cursor-default'}"
+									style="height: 520px;"
+								>
+									{#if member.photo}
+										<img src={member.photo} alt={member.name}
+											class="absolute inset-0 w-full h-full object-cover object-top group-hover:scale-110 transition-transform duration-700 ease-out"
+											loading="lazy" />
+									{:else}
+										<div class="absolute inset-0 bg-gradient-to-br from-sjcu-purple/30 to-sjcu-navy flex items-center justify-center">
+											<UserCircle2 class="w-32 h-32 text-white/20" />
+										</div>
+									{/if}
+									<div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent member-photo-overlay"></div>
+									<div class="absolute inset-0 bg-sjcu-purple/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+									<div class="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+										<span class="member-card-badge px-3 py-1.5 rounded-full backdrop-blur-sm text-xs font-medium">
+											{member.slug ? 'View Profile' : 'Profile Coming Soon'}
+										</span>
+									</div>
+									<div class="absolute bottom-0 left-0 right-0 p-8 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+										<h4 class="text-white font-display font-bold text-3xl mb-1 leading-tight">{member.name}</h4>
+										<p class="text-sjcu-accent text-base font-medium mb-5">{member.position}</p>
+										<div class="flex items-center gap-3 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-75">
+											{#each socials as { key, Icon }}
+												{#if member.socialLinks?.[key as keyof typeof member.socialLinks]}
+													<div class="member-card-social-icon w-11 h-11 rounded-xl backdrop-blur-md flex items-center justify-center">
+														<Icon class="w-4 h-4" />
+													</div>
+												{/if}
+											{/each}
+										</div>
+									</div>
+									<div class="absolute inset-0 rounded-3xl ring-0 group-hover:ring-2 group-hover:ring-sjcu-purple/60 transition-all duration-500 pointer-events-none"></div>
+								</button>
+							{/each}
+						</div>
+					{/if}
+				{/each}
+			</div>
 		{/if}
 	</div>
 </section>
 
 
 <style>
+	/* ── Mobile vignette ────────────────────────────────────────────────── */
+	.mobile-members-vignette {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		height: 320px;
+		background: linear-gradient(to top, var(--sjcu-dark-bg, #05050f) 10%, transparent 100%);
+		z-index: 10;
+	}
+	:global([data-theme="light"]) .mobile-members-vignette {
+		background: linear-gradient(to top, rgb(var(--sjcu-dark)) 10%, transparent 100%);
+	}
+
 	/* ── Card hover elements ─────────────────────────────────────────────── */
 	.member-card-badge {
 		background: rgba(255,255,255,0.15);
