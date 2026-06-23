@@ -267,7 +267,7 @@
 			</div>
 
 			<h1 class="hero-title opacity-0 font-display text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-sjcu-text-primary leading-[1.05] tracking-tight mb-6 mt-3">
-				Sung unto<br />
+				Sing unto<br />
 				<span class="purple-gradient-text">The Lord</span><br />
 				a new song.
 			</h1>
